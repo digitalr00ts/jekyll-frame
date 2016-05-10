@@ -1,7 +1,11 @@
 require 'rake'
 
 # Default task
-task :default => ['watch']
+if ENV["TRAVIS"]
+  task :default => ['build']
+else
+  task :default => ['watch']
+end
 
 desc "Generate the site"
 task :build do
