@@ -6,6 +6,10 @@ language: ruby
 rvm:
   # 2.2.0 is the latest version available w/o requiring a download
   - 2.2.0
+# whitelist
+branches:
+  only:
+    - master
 # Runs before addons are installed or Gemfile is processed
 before_install:
   - git config --global user.name ${GIT_NAME}
@@ -14,24 +18,30 @@ before_install:
   - git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
   - git checkout ${source_branch}
   - (cd ${build_dir} ; git checkout ${destination_branch})
-  - [ $nojekyll = 'true' ] && (cd ${build_dir} ; find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \;)
-  - [ $nojekyll = 'true' ] && (cd ${build_dir} ; touch .nojekyll)
-    - gem update --system
+  - if [ $nojekyll = 'true' ]; then \
+      (cd ${build_dir} ; find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \;) ;\
+      (cd ${build_dir} ; touch .nojekyll) ;\
+    fi
+  - gem update --system
 # Tests and Build
 before_script:
   - bundle exec jekyll doctor
 # script: bundle exec rake build
 after_success:
-  # Copy the generated files if nojekyll or merge branch
-  - [ $nojekyll = 'true' ] && (cp --recursive _site/* ${build_dir}) || (ch ${build_dir} ; git merge ${source_branch})
+# Copy the generated files if nojekyll or merge branch
+  - if [ $nojekyll = 'true' ]; then \
+      (cp --recursive _site/* ${build_dir}) ;\
+    else \
+     (ch ${build_dir} ; git merge ${source_branch}) ;\
+    fi
   - cd ${build_dir}
   - git add --all .
   - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
   - git push --quiet origin ${destination_branch}
 env:
   global:
-  - source_branch: master
-  - destination_branch: gh-pages
-  - build_dir: ../_build
-  # nojekyll is required to do things such as using plugins
-  - nojekyll: false
+    - source_branch=master
+    - destination_branch=gh-pages
+    - build_dir='../_build'
+    # nojekyll is required to do things such as using plugins
+    - nojekyll=false
