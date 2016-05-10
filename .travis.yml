@@ -27,19 +27,18 @@ before_script:
 - bundle exec jekyll doctor
 # script: bundle exec rake
 after_success:
+# Clone using ssh
+- git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
+- cd ${build_dir}
+- git checkout -B ${publish_branch}
 # Updated published branch
 - if [ $nojekyll = 'true' ]; then
-    git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir} ;
-    (cd ${build_dir} ;
-     git checkout -B ${publish_branch} ;
-     find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \; ;
-     touch .nojekyll) ;
-    cp --recursive _site/* ${build_dir} ;
+    find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \; ;
+    touch .nojekyll ;
+    (cd - ; cp --recursive _site/* ${build_dir}) ;
   else
-    git checkout -B ${publish_branch} ;
-    git merge ${source_branch} ;
+    git merge ${source_branch}) ;
   fi
-- if [ $nojekyll = 'true' ]; then cd ${build_dir} ; fi
 - git add --all .
 - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
 - git push origin ${publish_branch}
@@ -47,7 +46,6 @@ env:
   global:
   - source_branch=master
   - publish_branch=gh-pages
-  # Temparary working directory for nojekyll
-  - build_dir='../_build'
+  - build_dir='/tmp/jekyll_build'
   # nojekyll will publish the post processed site
   - nojekyll=false
