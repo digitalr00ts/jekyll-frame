@@ -12,8 +12,8 @@ branches:
     - master
 # Runs before addons are installed or Gemfile is processed
 before_install:
-  - git config --global user.name ${GIT_NAME}
-  - git config --global user.email ${GIT_EMAIL}
+  - git config --global user.name "Travis CI User"
+  - git config --global user.email "travis@build_${TRAVIS_BUILD_NUMBER}"
   - git config --global push.default simple
   - git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
   - git checkout ${source_branch}
