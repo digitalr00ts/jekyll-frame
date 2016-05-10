@@ -39,7 +39,7 @@ after_success:
     git remote set-url origin --push git@github.com:${TRAVIS_REPO_SLUG}.git ;
     git remote set-branches --add origin ${publish_branch} ;
     git checkout -B ${publish_branch} ;
-    git merge ${source_branch}) ;
+    git merge ${source_branch} ;
   fi
 - git add --all .
 - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
