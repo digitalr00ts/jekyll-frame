@@ -1,47 +1,34 @@
-# travis-ci.org
-
-# Set language
 language: ruby
-# Ruby Version Manager
 rvm:
-  # 2.2.0 is the latest version available w/o requiring a download
-  - 2.2.0
-# whitelist
+- 2.2.0
 branches:
   only:
-    - master
-# Runs before addons are installed or Gemfile is processed
+  - master
 before_install:
-  - git config --global user.name "Travis CI User"
-  - git config --global user.email "travis@build_${TRAVIS_BUILD_NUMBER}"
-  - git config --global push.default simple
-  - git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
-  - git checkout ${source_branch}
-  - (cd ${build_dir} ; git checkout ${destination_branch})
-  - if [ $nojekyll = 'true' ]; then \
-      (cd ${build_dir} ; find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \;) ;\
-      (cd ${build_dir} ; touch .nojekyll) ;\
-    fi
-  - gem update --system
-# Tests and Build
+- openssl aes-256-cbc -K $encrypted_f0453a157e60_key -iv $encrypted_f0453a157e60_iv
+  -in travis_id_rsa.enc -out ../travis_id_rsa -d
+- git config --global user.name "Travis CI User"
+- git config --global user.email "travis@build_${TRAVIS_BUILD_NUMBER}"
+- git config --global push.default simple
+- git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
+- git checkout ${source_branch}
+- "(cd ${build_dir} ; git checkout ${destination_branch})"
+- if [ $nojekyll = 'true' ]; then \ (cd ${build_dir} ; find . -maxdepth 1 -not -name
+  .git -not -name . -exec rm --recursive --force {} \;) ;\ (cd ${build_dir} ; touch
+  .nojekyll) ;\ fi
+- gem update --system
 before_script:
-  - bundle exec jekyll doctor
-# script: bundle exec rake build
+- bundle exec jekyll doctor
 after_success:
-# Copy the generated files if nojekyll or merge branch
-  - if [ $nojekyll = 'true' ]; then \
-      (cp --recursive _site/* ${build_dir}) ;\
-    else \
-     (ch ${build_dir} ; git merge ${source_branch}) ;\
-    fi
-  - cd ${build_dir}
-  - git add --all .
-  - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
-  - git push --quiet origin ${destination_branch}
+- if [ $nojekyll = 'true' ]; then \ (cp --recursive _site/* ${build_dir}) ;\ else
+  \ (ch ${build_dir} ; git merge ${source_branch}) ;\ fi
+- cd ${build_dir}
+- git add --all .
+- git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
+- git push --quiet origin ${destination_branch}
 env:
   global:
-    - source_branch=master
-    - destination_branch=gh-pages
-    - build_dir='../_build'
-    # nojekyll is required to do things such as using plugins
-    - nojekyll=false
+  - source_branch=master
+  - destination_branch=gh-pages
+  - build_dir='../_build'
+  - nojekyll=false
