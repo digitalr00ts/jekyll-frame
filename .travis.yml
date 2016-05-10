@@ -14,8 +14,8 @@ before_install:
 - git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
 - git checkout ${source_branch}
 - (cd ${build_dir} ;
-  git show-ref --verify --quiet refs/heads/#{destination_branch} || git checkout -B ${destination_branch} ;
-  git checkout ${destination_branch})
+  git show-ref --verify --quiet refs/heads/#{publish_branch} || git checkout -B ${publish_branch} ;
+  git checkout ${publish_branch})
 - if [ $nojekyll = 'true' ]; then
     (cd ${build_dir} ; find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \;) ;
     (cd ${build_dir} ; touch .nojekyll) ;
@@ -32,10 +32,10 @@ after_success:
 - cd ${build_dir}
 - git add --all .
 - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
-- git push --quiet origin ${destination_branch}
+- git push --quiet origin ${publish_branch}
 env:
   global:
   - source_branch=master
-  - destination_branch=gh-pages
+  - publish_branch=gh-pages
   - build_dir='../_build'
   - nojekyll=false
