@@ -31,6 +31,16 @@ kramdown:
 sass:
   style: compressed
 
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - Rakefile
+  - _rake
+  - LICENSE
+  - README.md
+  - id_rsa.enc
+
 gems:
   - jekyll-coffeescript
   - jekyll-paginate
