@@ -1,0 +1,37 @@
+# travis-ci.org
+
+# Set language
+language: ruby
+# Ruby Version Manager
+rvm:
+  # 2.2.0 is the latest version available w/o requiring a download
+  - 2.2.0
+# Runs before addons are installed or Gemfile is processed
+before_install:
+  - git config --global user.name ${GIT_NAME}
+  - git config --global user.email ${GIT_EMAIL}
+  - git config --global push.default simple
+  - git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
+  - git checkout ${source_branch}
+  - (cd ${build_dir} ; git checkout ${destination_branch})
+  - [ $nojekyll = 'true' ] && (cd ${build_dir} ; find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \;)
+  - [ $nojekyll = 'true' ] && (cd ${build_dir} ; touch .nojekyll)
+    - gem update --system
+# Tests and Build
+before_script:
+  - bundle exec jekyll doctor
+# script: bundle exec rake build
+after_success:
+  # Copy the generated files if nojekyll or merge branch
+  - [ $nojekyll = 'true' ] && (cp --recursive _site/* ${build_dir}) || (ch ${build_dir} ; git merge ${source_branch})
+  - cd ${build_dir}
+  - git add --all .
+  - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
+  - git push --quiet origin ${destination_branch}
+env:
+  global:
+  - source_branch: master
+  - destination_branch: gh-pages
+  - build_dir: ../_build
+  # nojekyll is required to do things such as using plugins
+  - nojekyll: false
