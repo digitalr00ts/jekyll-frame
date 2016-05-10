@@ -17,17 +17,8 @@ before_install:
 - git config --global user.name "Travis CI User"
 - git config --global user.email "travis@build_${TRAVIS_BUILD_NUMBER}"
 - git config --global push.default simple
-- git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
-# Checkout to necassary branches
+# Ensuring in correct branch
 - git checkout ${source_branch}
-- (cd ${build_dir} ;
-  git show-ref --verify --quiet refs/heads/#{publish_branch} || git checkout -B ${publish_branch} ;
-  git checkout ${publish_branch})
-# Clear branch if not using Github Pages to render
-- if [ $nojekyll = 'true' ]; then
-    (cd ${build_dir} ; find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \;) ;
-    (cd ${build_dir} ; touch .nojekyll) ;
-  fi
 # Update gem
 - gem update --system
 # install: bundle install --jobs=3 --retry=3
@@ -38,19 +29,25 @@ before_script:
 after_success:
 # Updated published branch
 - if [ $nojekyll = 'true' ]; then
-    (cp --recursive _site/* ${build_dir}) ;
+    git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir} ;
+    (cd ${build_dir} ;
+     git checkout -B ${publish_branch} ;
+     find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \; ;
+     touch .nojekyll) ;
+    cp --recursive _site/* ${build_dir} ;
   else
-    (ch ${build_dir} ; git merge ${source_branch}) ;
+    git checkout -B ${publish_branch} ;
+    git merge ${source_branch} ;
   fi
-- cd ${build_dir}
+- if [ $nojekyll = 'true' ]; then cd ${build_dir} ; fi
 - git add --all .
 - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
-- git push --quiet origin ${publish_branch}
+- git push origin ${publish_branch}
 env:
   global:
   - source_branch=master
   - publish_branch=gh-pages
-  # Temparary working directory
+  # Temparary working directory for nojekyll
   - build_dir='../_build'
   # nojekyll will publish the post processed site
   - nojekyll=false
