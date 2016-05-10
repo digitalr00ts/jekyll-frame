@@ -3,5 +3,5 @@ gem 'github-pages', group: :jekyll_plugins
 
 group :local_utils do
   gem "rake"
-  gem "travis"
+#  gem "travis"
 end
