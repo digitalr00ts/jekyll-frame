@@ -13,16 +13,22 @@ before_install:
 - git config --global push.default simple
 - git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
 - git checkout ${source_branch}
-- "(cd ${build_dir} ; git checkout ${destination_branch})"
-- if [ $nojekyll = 'true' ]; then \ (cd ${build_dir} ; find . -maxdepth 1 -not -name
-  .git -not -name . -exec rm --recursive --force {} \;) ;\ (cd ${build_dir} ; touch
-  .nojekyll) ;\ fi
+- (cd ${build_dir} ;\
+  git show-ref --verify --quiet refs/heads/#{destination_branch} || git checkout -B ${destination_branch} ;\
+  git checkout ${destination_branch})
+- if [ $nojekyll = 'true' ]; then \
+  (cd ${build_dir} ; find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \;) ;\
+  (cd ${build_dir} ; touch .nojekyll) ;\
+  fi
 - gem update --system
 before_script:
 - bundle exec jekyll doctor
 after_success:
-- if [ $nojekyll = 'true' ]; then \ (cp --recursive _site/* ${build_dir}) ;\ else
-  \ (ch ${build_dir} ; git merge ${source_branch}) ;\ fi
+- if [ $nojekyll = 'true' ]; then \
+    (cp --recursive _site/* ${build_dir}) ;\
+  else \
+    (ch ${build_dir} ; git merge ${source_branch}) ;\
+  fi
 - cd ${build_dir}
 - git add --all .
 - git commit -m "Updating to ${TRAVIS_REPO_SLUG}@$(git log -1 --pretty=%h)"
