@@ -39,7 +39,7 @@ exclude:
   - _rake
   - LICENSE
   - README.md
-  - id_rsa.enc
+  - _secrets
 
 gems:
   - jekyll-coffeescript
