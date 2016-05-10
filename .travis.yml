@@ -27,16 +27,17 @@ before_script:
 - bundle exec jekyll doctor
 # script: bundle exec rake
 after_success:
-# Clone using ssh
-- git clone git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir}
-- cd ${build_dir}
-- git checkout -B ${publish_branch}
 # Updated published branch
 - if [ $nojekyll = 'true' ]; then
+    git clone --branch ${publish_branch} git@github.com:${TRAVIS_REPO_SLUG}.git ${build_dir} ;
+    cd ${build_dir} ;
     find . -maxdepth 1 -not -name .git -not -name . -exec rm --recursive --force {} \; ;
     touch .nojekyll ;
     (cd - ; cp --recursive _site/* ${build_dir}) ;
   else
+    git remote set-url origin --push git@github.com:${TRAVIS_REPO_SLUG}.git ;
+    git remote set-branches --add origin ${publish_branch} ;
+    git checkout -B ${publish_branch} ;
     git merge ${source_branch}) ;
   fi
 - git add --all .
@@ -46,6 +47,7 @@ env:
   global:
   - source_branch=master
   - publish_branch=gh-pages
+  # Working directory for nojekyll
   - build_dir='/tmp/jekyll_build'
   # nojekyll will publish the post processed site
   - nojekyll=false
