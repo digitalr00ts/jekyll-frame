@@ -20,7 +20,8 @@ before_install:
 # Ensuring in correct branch
 - git checkout ${source_branch}
 # Update gem
-- gem update --silent --system 
+- gem update --quiet --system
+- gem install bundle
 # install: bundle install --jobs=3 --retry=3
 before_script:
 # jekyll configuration lint test
